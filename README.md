@@ -79,6 +79,7 @@ The Rust native module is build locally and then loaded by Emacs from the instal
 - integrate with Git to support formatting hunks through different hooks
 - publish the CLI crate on crates.io
 - add a VS Code extension
+- add support for `doseq`, `for`
 
 
 
