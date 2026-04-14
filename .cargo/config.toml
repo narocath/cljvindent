@@ -1,0 +1,6 @@
+[alias]
+run-cli = "run -p clj-vindent-cli"
+build-cli = "build -p clj-vindent-cli --release --bin cljvindent"
+build-emacs = "build -p clj-vindent-emacs-module --release --lib"
+test-all = "test --workspace"
+check-all = "check --workspace"

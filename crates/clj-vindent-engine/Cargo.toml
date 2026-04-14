@@ -1,0 +1,16 @@
+[package]
+name = "clj-vindent-engine"
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+tree-sitter = "0.25"
+tree-sitter-clojure = "0.1.0"
+rayon = "1.11"
+rstest = "0.26.1"
+tracing = {version = "0.1.44", features = ["attributes"]}
+
+[dev-dependencies]
+pretty_assertions = "1"
