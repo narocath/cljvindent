@@ -1,6 +1,6 @@
 # cljvindent
 
-`cljvindent` is a Rust formatter focused on fast vertical alignment for Clojure, ClojureScript, and EDN code. It's created for speed and for practical formatting of forms, regions, and whole files. Its core library can be used either through the CLI as a standalone executable or through an Emacs package that loads it as a native module. The alignments for some forms include some mild formatting preferences, but nothing too extreme.
+`cljvindent` is a Rust indentation and vertical-alignment engine for Clojure, ClojureScript, and EDN code. It's created for speed and for handling large regions, large files. Its core library can be used either through the CLI as a standalone executable that can accept either a string or a path for a whole file or through an Emacs package that loads it as a native module. Some form alignments follow a specific style and include a few mild layout preferences, but nothing too extreme.
 
 ## Features
 
