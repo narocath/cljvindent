@@ -8,7 +8,12 @@ use tracing_subscriber::{filter::LevelFilter};
 
 emacs::plugin_is_GPL_compatible!();
 
-#[emacs::module(name = "cljvindent", defun_prefix = "cljvindent", separator = "--")]
+#[emacs::module(
+    name = "cljvindent",
+    defun_prefix = "cljvindent",
+    separator = "--",
+    mod_in_name = false
+)]
 pub fn init(_: &Env) -> Result<()>{
     Ok(())
 }
