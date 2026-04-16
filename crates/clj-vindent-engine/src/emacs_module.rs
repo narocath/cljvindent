@@ -8,13 +8,18 @@ use tracing_subscriber::{filter::LevelFilter};
 
 emacs::plugin_is_GPL_compatible!();
 
-#[emacs::module(name = "cljvindent", defun_prefix = "cljvindent", separator = "--")]
-fn init(_: &Env) -> Result<()>{
+#[emacs::module(
+    name = "cljvindent",
+    defun_prefix = "cljvindent",
+    separator = "--",
+    mod_in_name = false
+)]
+pub fn init(_: &Env) -> Result<()>{
     Ok(())
 }
 
 #[defun]
-fn indent_string(
+pub fn indent_string(
     input: String,
     base_col: usize,
     enable_logs: Value<'_>,
@@ -40,7 +45,7 @@ fn indent_string(
 
 
 #[defun]
-fn indent_string_collection<'e>(
+pub fn indent_string_collection<'e>(
     env: &'e Env,
     input: Vector<'e>,
     enable_logs: Value<'_>,
@@ -88,7 +93,7 @@ fn indent_string_collection<'e>(
 }
 
 #[defun]
-fn indent_clj_file(
+pub fn indent_clj_file(
     path: String,
     enable_logs: Value<'_>,
     loglvl: String,
