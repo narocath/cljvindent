@@ -1,4 +1,4 @@
-;;; cljvindent.el --- Indent Clojure forms using a Rust native module -*- lexical-binding: t; -*-
+;;; cljvindent.el --- Indent Clojure, ClojureScript, and EDN code using a native module -*- lexical-binding: t; -*-
 
 ;; Author: Panagiotis Koromilias
 ;; Version: 0.1.0
@@ -7,19 +7,24 @@
 ;; Keywords: tools
 
 ;;; Commentary:
-;; cljvindent formats Clojure(script) code using a Rust native module.
+;; cljvindent formats Clojure(script) code using a native module.
 ;; It can format:
 ;; - the current form at point
-;; - the parent form at point
-;; - the outer parent form at point
+;; - the parent form of the current form
+;; - the outer parent form of the current form
 ;; - the top-level form at point
 ;; - the active region
 ;; - the whole file
 
-(require 'subr-x)
+;;; Code:
+
+(require 'thingatpt)
 (require 'cljvindent-build)
 
-(defconst cljvindent--module-name "clj_vindent_emacs_module")
+(declare-function cljvindent--indent-string nil
+                  (text base-col enable-logs log-level log-file-output-type))
+(declare-function cljvindent--indent-clj-file nil
+                  (file enable-logs log-level log-file-output-type))
 
 (defvar cljvindent--module-loaded nil
   "Non-nil once the native module has been loaded.")
@@ -42,25 +47,28 @@ Return non-nil on success."
         (setq cljvindent--module-loaded t))))
   cljvindent--module-loaded)
 
-
 (defun cljvindent--ensure-module ()
-  "Ensure cljvindent module exists and is loaded."
-  (interactive)
+  "Ensure the cljvindent native module exists and is loaded."
   (or (cljvindent--load-module)
       (when cljvindent-auto-build-module
         (when (y-or-n-p "Module cljvindent is missing. Build it now? ")
           (cljvindent-build-module)
           (cljvindent--load-module)))
-      (error "Module cljvindent is not available")))
+      (user-error "Module cljvindent is not available")))
 
 ;;;###autoload
 (defun cljvindent-install-module ()
-  "Interactive entry point to build and load the module."
+  "Build and load the cljvindent native module."
   (interactive)
-  (cljvindent-build-module)
-  (unless (cljvindent--load-module)
-    (error "Module cljvindent:  built but could not be loaded"))
-  (message "Native module cljvindent: is ready"))
+  (let ((was-loaded cljvindent--module-loaded))
+    (cljvindent-build-module)
+    (cond
+     (was-loaded
+      (message "Native module rebuilt. Restart Emacs to use the new version"))
+     ((cljvindent--load-module)
+      (message "Native module cljvindent is ready"))
+     (t
+      (user-error "Module cljvindent was built but could not be loaded")))))
 
 (defun cljvindent--supported-mode-p ()
   "Return non-nil if the current buffer is in a supported mode."
@@ -86,14 +94,36 @@ Return non-nil on success."
             (cljvindent--slice-form-data start (point))))
       (error nil))))
 
-(defun cljvindent--parent-form-data ()
-  "Return plist data for the parent form at point, or nil."
+(defun cljvindent--current-form-data ()
+  "Return plist data for the current form at point, or nil."
+  (save-excursion
+    (let ((ppss (syntax-ppss)))
+      (unless (or (nth 3 ppss) (nth 4 ppss))
+        (condition-case nil
+            (cond
+             ((looking-at-p "\\s(")
+              (let ((start (point))
+                    (end (scan-sexps (point) 1)))
+                (when end
+                  (cljvindent--slice-form-data start end))))
+             (t
+              (let ((bounds (bounds-of-thing-at-point 'sexp)))
+                (when bounds
+                  (cljvindent--slice-form-data (car bounds) (cdr bounds))))))
+          (error nil))))))
+
+(defun cljvindent--enclosing-form-data (levels)
+  "Return plist data for the enclosing form LEVELS up from point, or nil."
   (save-excursion
     (let ((ppss (syntax-ppss)))
       (unless (or (nth 3 ppss) (nth 4 ppss))
         (condition-case nil
             (progn
               (unless (looking-at-p "\\s(")
+                (let ((bounds (bounds-of-thing-at-point 'sexp)))
+                  (when bounds
+                    (goto-char (car bounds)))))
+              (dotimes (_ levels)
                 (backward-up-list 1))
               (let ((start (point))
                     (end (scan-sexps (point) 1)))
@@ -101,48 +131,23 @@ Return non-nil on success."
                   (cljvindent--slice-form-data start end))))
           (error nil))))))
 
-(defun cljvindent--immediate-parent-form-data ()
-  "Return plist data for the immediate parent form at point, or nil."
-  (save-excursion
-    (let ((ppss (syntax-ppss)))
-      (unless (or (nth 3 ppss) (nth 4 ppss))
-        (condition-case nil
-            (progn
-              (unless (looking-at-p "\\s(")
-                (backward-up-list 1))
-              (let ((start (point))
-                    (end (scan-sexps (point) 1)))
-                (when end
-                  (cljvindent--slice-form-data start end))))
-          (error nil))))))
+(defun cljvindent--parent-form-data ()
+  "Return plist data for the parent form of the current form, or nil."
+  (cljvindent--enclosing-form-data 1))
 
 (defun cljvindent--outer-parent-form-data ()
-  "Return plist data for the outer parent form at point, or nil."
-  (save-excursion
-    (let ((ppss (syntax-ppss)))
-      (unless (or (nth 3 ppss) (nth 4 ppss))
-        (condition-case nil
-            (progn
-              (unless (looking-at-p "\\s(")
-                (backward-up-list 1))
-              (backward-up-list 1)
-              (let ((start (point))
-                    (end (scan-sexps (point) 1)))
-                (when end
-                  (cljvindent--slice-form-data start end))))
-          (error nil))))))
+  "Return plist data for the outer parent form of the current form, or nil."
+  (cljvindent--enclosing-form-data 2))
 
 (defun cljvindent--region-form-data ()
-  "Get the regions form data."
+  "Return plist data for the active region, or nil."
   (when (use-region-p)
     (cljvindent--slice-form-data (region-beginning) (region-end))))
 
 (defun cljvindent--replace-form-with (form-data formatter-fn)
-  "Will apply formatter result to the place where the form's bounds were.
-Will use FORM-DATA(start, end etc), and the FORMATTER-FN on which will use from
-the module."
+  "Replace FORM-DATA with the result of calling FORMATTER-FN."
   (unless form-data
-    (error "No form/region found"))
+    (user-error "No form or region found"))
   (let* ((start (plist-get form-data :start))
          (end (plist-get form-data :end))
          (text (substring-no-properties (plist-get form-data :text)))
@@ -171,73 +176,97 @@ the module."
     result))
 
 ;;;###autoload
-(defun cljvindent-format-top-level-form ()
-  "Will pick the parent form on where the cursor is and will try to indent it."
+(defun cljvindent-indent-current-form ()
+  "Indent the current form at point."
   (interactive)
   (unless (cljvindent--supported-mode-p)
-    (error "Module cljvindent supports only clojure(script)/edn-mode"))
+    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode"))
   (cljvindent--ensure-module)
-  (let ((start (current-time)))
+  (let ((start-time (current-time)))
+    (cljvindent--replace-form-with
+     (cljvindent--current-form-data)
+     #'cljvindent--indent-string)
+    (message "cljvindent done in %.3fs"
+             (float-time (time-subtract (current-time) start-time)))))
+
+;;;###autoload
+(defun cljvindent-indent-top-level-form ()
+  "Indent the top-level form at point."
+  (interactive)
+  (unless (cljvindent--supported-mode-p)
+    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode"))
+  (cljvindent--ensure-module)
+  (let ((start-time (current-time)))
     (cljvindent--replace-form-with
      (cljvindent--top-level-form-data)
      #'cljvindent--indent-string)
-    (message "cljvindent Done in: %.3fs"
-             (float-time (time-subtract (current-time) start)))))
+    (message "cljvindent done in %.3fs"
+             (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-format-parent ()
-  "Will format the parent form of the form that the cursor currently is inside."
+(defun cljvindent-indent-parent ()
+  "Indent the parent form of the current form."
   (interactive)
   (unless (cljvindent--supported-mode-p)
-    (error "Module cljvindent supports only clojure(script)/edn-mode"))
+    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode"))
   (cljvindent--ensure-module)
-  (let ((start (current-time)))
+  (let ((start-time (current-time)))
     (cljvindent--replace-form-with
      (cljvindent--parent-form-data)
      #'cljvindent--indent-string)
-    (message "cljvindent Done in: %.3fs"
-             (float-time (time-subtract (current-time) start)))))
+    (message "cljvindent done in %.3fs"
+             (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-format-outer-parent ()
-  "Will format the outer parent of the form that the cursor currenly is inside."
+(defun cljvindent-indent-outer-parent ()
+  "Indent the outer parent form of the current form."
   (interactive)
   (unless (cljvindent--supported-mode-p)
-    (error "Module cljvindent supports only clojure(script)/edn-mode"))
+    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode"))
   (cljvindent--ensure-module)
-  (let ((start (current-time)))
+  (let ((start-time (current-time)))
     (cljvindent--replace-form-with
      (cljvindent--outer-parent-form-data)
      #'cljvindent--indent-string)
-    (message "cljvindent Done in: %.3fs"
-             (float-time (time-subtract (current-time) start)))))
+    (message "cljvindent done in %.3fs"
+             (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-format-region ()
-  "Will extract the region and will try to indent it vertically."
+(defun cljvindent-indent-region ()
+  "Indent the active region."
   (interactive)
   (unless (cljvindent--supported-mode-p)
-    (error "Module cljvindent supports only clojure(script)/edn-mode"))
-  (cljvindent-ensure-module)
-  (let ((start (current-time)))
+    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode"))
+  (cljvindent--ensure-module)
+  (let ((start-time (current-time)))
     (cljvindent--replace-form-with
      (cljvindent--region-form-data)
      #'cljvindent--indent-string)
-    (message "cljvindent Done in: %.3fs"
-             (float-time (time-subtract (current-time) start)))))
+    (message "cljvindent done in %.3fs"
+             (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-format-whole-buffer ()
-  "Will vertically indent the whole file of the current buffer."
+(defun cljvindent-indent-whole-buffer ()
+  "Indent the whole file of the current buffer."
   (interactive)
   (unless (cljvindent--supported-mode-p)
-    (error "Module cljvindent supports only clojure(script)/edn-mode"))
+    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode");)
   (cljvindent--ensure-module)
-  (let* ((start  (current-time))
-         (result (cljvindent--indent-clj-file (buffer-file-name) cljvindent-enable-logs cljvindent-log-level cljvindent-log-file-output-type)))
-    (revert-buffer :ignore-auto :noconfirm) ;; force buffer reload after full file update
-    (message "cljvindent Done in: %.3fs"
-             (float-time (time-subtract (current-time) start)))))
+  (unless buffer-file-name
+    (user-error "Current buffer is not visiting a file"))
+  (when (buffer-modified-p)
+    (unless (y-or-n-p "Buffer has unsaved changes. Save before indenting? ")
+      (user-error "Indenting aborted"))
+    (save-buffer))
+  (let ((start-time (current-time)))
+    (cljvindent--indent-clj-file
+     buffer-file-name
+     cljvindent-enable-logs
+     cljvindent-log-level
+     cljvindent-log-file-output-type)
+    (revert-buffer :ignore-auto :noconfirm)
+    (message "cljvindent done in %.3fs"
+             (float-time (time-subtract (current-time) start-time))))))
 
 (provide 'cljvindent)
 
