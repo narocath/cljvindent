@@ -14,7 +14,7 @@ pub fn init(_: &Env) -> Result<()>{
 }
 
 #[defun]
-fn indent_string(
+pub fn indent_string(
     input: String,
     base_col: usize,
     enable_logs: Value<'_>,
