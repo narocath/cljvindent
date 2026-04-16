@@ -3,7 +3,7 @@
 ;; Author: Panagiotis Koromilias
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "29.1"))
-;; URL: https://github.com/narocath/cljvindent
+;; URL: https://github.com/narocath/cljvindent-emacs
 ;; Keywords: tools
 
 ;;; Commentary:

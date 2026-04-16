@@ -3,7 +3,7 @@
 ;; Author: Panagiotis Koromilias
 ;; Version: 0.1.0
 
-;; URL: https://github.com/narocath/cljvindent
+;; URL: https://github.com/narocath/cljvindent-emacs
 
 ;;; Commentary:
 ;; Build helpers for compiling and installing the cljvindent native module.
