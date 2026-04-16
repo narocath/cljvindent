@@ -1,7 +1,11 @@
 mod indentation_engine;
+use std::sync::{Mutex, OnceLock};
 use tracing_appender::{non_blocking, rolling};
 use tracing_subscriber::{fmt, layer::Layer, registry::Registry, filter::LevelFilter, prelude::*};
 use clap::ValueEnum;
+
+static LOG_GUARD: OnceLock<Mutex<Option<tracing_appender::non_blocking::WorkerGuard>>> =
+    OnceLock::new();
 
 pub use indentation_engine::{
     helpers,
@@ -38,18 +42,25 @@ pub enum LogLevel {
 pub fn init_logging(enabled: bool, lvl: LevelFilter) {
     let level = if enabled { lvl } else { LevelFilter::OFF };
 
-    fmt()
+    let _ = fmt()
         .with_max_level(level)
         .pretty()
-        .init();
+        .try_init();
 }
 
 pub fn init_logging_with_file(
     enabled: bool,
     level: LevelFilter,
     file_out_type: LogOutputType,
-) -> tracing_appender::non_blocking::WorkerGuard {
+) {
+    let slot = LOG_GUARD.get_or_init(|| Mutex::new(None));
+
+    if slot.lock().unwrap().is_some(){
+        return;
+    }
     let level = if enabled { level } else { LevelFilter::OFF };
+
+    let _ = std::fs::create_dir_all("logs").ok();
 
     let file_appender = rolling::daily("logs", "cljvindent.log");
     let (file_writer, guard) = non_blocking(file_appender);
@@ -67,14 +78,15 @@ pub fn init_logging_with_file(
             .with_writer(file_writer)
             .boxed()
     };
-
-    tracing_subscriber::registry()
+    if tracing_subscriber::registry()
         .with(file_layer)
         .with(level)
         .with(stdout_layer)
-        .init();
-
-    guard
+        .try_init()
+        .is_ok()
+    {
+        *slot.lock().unwrap() = Some(guard);
+    }
 }
 
 #[cfg(feature = "emacs-module")]
