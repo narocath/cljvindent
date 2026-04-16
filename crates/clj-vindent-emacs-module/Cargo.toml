@@ -10,6 +10,5 @@ crate-type = ["cdylib"]
 
 [dependencies] 
 clj-vindent-engine = {path = "../clj-vindent-engine"}
-clj-vindent-cli = {path = "../clj-vindent-cli"}
 emacs = "0.21.0"
 tracing-subscriber = { version = "0.3", features = ["json"] }

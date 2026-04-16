@@ -1,7 +1,7 @@
 use clj_vindent_engine::{indent_clojure_string,
                          indent_clojure_string_collection,
-                         indent_clojure_file_no_return};
-use clj_vindent_cli::{init_logging_with_file, LogOutputType};
+                         indent_clojure_file_no_return,
+                         init_logging_with_file, LogOutputType};
 use tracing_subscriber::{filter::LevelFilter};
 
 

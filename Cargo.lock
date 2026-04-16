@@ -138,7 +138,6 @@ dependencies = [
 name = "clj-vindent-emacs-module"
 version = "0.1.0"
 dependencies = [
- "clj-vindent-cli",
  "clj-vindent-engine",
  "emacs",
  "tracing-subscriber",
@@ -148,10 +147,13 @@ dependencies = [
 name = "clj-vindent-engine"
 version = "0.1.0"
 dependencies = [
+ "clap",
  "pretty_assertions",
  "rayon",
  "rstest",
  "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
  "tree-sitter",
  "tree-sitter-clojure",
 ]
