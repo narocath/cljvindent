@@ -61,7 +61,7 @@
 
 (defun cljvindent--rust-project-dir ()
   "Return the Rust project directory."
-  (expand-file-name "clj_vindent_engine"
+  (expand-file-name "clj-vindent-engine"
                     (cljvindent--project-root)))
 
 (defun cljvindent--cargo-manifest-file ()
