@@ -206,7 +206,7 @@ pub fn indent_clojure_string(src: &str, base_col: usize) -> String {
     let elapsed = start.elapsed();
     
     info!("Done formmating string!");
-    info!("Result string {result}");
+    debug!("Result string {result}");
     info!("Elapsed: {:.3?}", elapsed);
     
     result
@@ -223,6 +223,7 @@ pub fn indent_clojure_string_collection(cols: &[(String, usize)]) -> Vec<String>
     let elapsed = start.elapsed();
     
     info!("Done formatting collection of strings!");
+    debug!("Result string {result}");
     info!("Elapsed: {:.3?}", elapsed);
     
     result
