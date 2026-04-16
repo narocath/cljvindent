@@ -64,13 +64,19 @@
   cljvindent--package-dir)
 
 (defun cljvindent--rust-project-dir ()
-  "Return the Rust project directory."
+  "Return the native's module project directory."
   (expand-file-name "clj-vindent-engine" cljvindent--package-dir))
 
 (defun cljvindent--cargo-manifest-file ()
   "Return the Cargo.toml path for the native project."
   (expand-file-name "Cargo.toml"
                     (cljvindent--rust-project-dir)))
+
+(defun cljvindent--installed-module-file ()
+  "Return the installed module path."
+  (expand-file-name
+   (concat cljvindent--module-name module-file-suffix)
+   (cljvindent--package-dir)))
 
 (defun cljvindent--cargo-target-dir ()
   "Return the module target/release directory."
