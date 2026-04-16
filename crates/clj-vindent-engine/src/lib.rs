@@ -76,3 +76,6 @@ pub fn init_logging_with_file(
 
     guard
 }
+
+#[cfg(feature = "emacs-module")]
+mod emacs_module;

@@ -1,4 +1,4 @@
-use clj_vindent_engine::{indent_clojure_file_no_return, indent_clojure_string,
+use cljvindent::{indent_clojure_file_no_return, indent_clojure_string,
                          init_logging, init_logging_with_file, LogOutputType, LogMode, LogLevel};
 use std::time::Instant;
 use std::path::PathBuf;

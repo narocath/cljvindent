@@ -135,19 +135,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "clj-vindent-emacs-module"
-version = "0.1.0"
-dependencies = [
- "clj-vindent-engine",
- "emacs",
- "tracing-subscriber",
-]
-
-[[package]]
 name = "clj-vindent-engine"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "emacs",
  "pretty_assertions",
  "rayon",
  "rstest",
