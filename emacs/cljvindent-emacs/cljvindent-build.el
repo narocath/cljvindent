@@ -49,31 +49,28 @@
   :group 'cljvindent
   :type 'boolean)
 
-(defun cljvindent--package-dir ()
-  "Return the installed package directory."
+(defconst cljvindent--package-dir
   (file-name-directory
    (or load-file-name
-       (locate-library "cljvindent-build"))))
+       (locate-library "cljvindent-build")))
+  "Directory where cljvindent is installed.")
+
+(defun cljvindent--package-dir ()
+  "Return the installed package directory."
+  cljvindent--package-dir)
 
 (defun cljvindent--project-root ()
   "Return the cljvindent project root."
-  (cljvindent--package-dir))
+  cljvindent--package-dir)
 
 (defun cljvindent--rust-project-dir ()
   "Return the Rust project directory."
-  (expand-file-name "clj-vindent-engine"
-                    (cljvindent--project-root)))
+  (expand-file-name "clj-vindent-engine" cljvindent--package-dir))
 
 (defun cljvindent--cargo-manifest-file ()
   "Return the Cargo.toml path for the native project."
   (expand-file-name "Cargo.toml"
                     (cljvindent--rust-project-dir)))
-
-(defun cljvindent--installed-module-file ()
-  "Return the installed module path for the current OS."
-  (expand-file-name
-   (concat cljvindent--module-name module-file-suffix)
-   (cljvindent--package-dir)))
 
 (defun cljvindent--cargo-target-dir ()
   "Return the module target/release directory."
