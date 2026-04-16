@@ -1,0 +1,36 @@
+[package]
+name = "clj-vindent-engine"
+license.workspace = true
+repository.workspace = true
+version.workspace = true
+edition.workspace = true
+
+
+[lib]
+name = "cljvindent"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+emacs-module = ["dep:emacs"]
+
+
+[dependencies]
+tree-sitter = "0.25"
+clap = { version = "4.6", features = ["derive"] }
+tree-sitter-clojure = "0.1.0"
+rayon = "1.11"
+rstest = "0.26.1"
+tracing = {version = "0.1.44", features = ["attributes"]}
+tracing-subscriber = { version = "0.3", features = ["json"] }
+tracing-appender = "0.2"
+emacs = {version = "0.21.0", optional = true}
+
+[dev-dependencies]
+pretty_assertions = "1"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
