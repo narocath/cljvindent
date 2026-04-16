@@ -250,7 +250,7 @@ Return non-nil on success."
   "Indent the whole file of the current buffer."
   (interactive)
   (unless (cljvindent--supported-mode-p)
-    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode");)
+    (user-error "Supported modes: clojure-mode, clojurescript-mode, and edn-mode"))
   (cljvindent--ensure-module)
   (unless buffer-file-name
     (user-error "Current buffer is not visiting a file"))
@@ -266,7 +266,7 @@ Return non-nil on success."
      cljvindent-log-file-output-type)
     (revert-buffer :ignore-auto :noconfirm)
     (message "cljvindent done in %.3fs"
-             (float-time (time-subtract (current-time) start-time))))))
+             (float-time (time-subtract (current-time) start-time)))))
 
 (provide 'cljvindent)
 
