@@ -60,9 +60,9 @@ pub fn init_logging_with_file(
     }
     let level = if enabled { level } else { LevelFilter::OFF };
 
-    let _ = std::fs::create_dir_all("logs").ok();
+    let _ = std::fs::create_dir_all(".cljvindent_logs").ok();
 
-    let file_appender = rolling::daily("logs", "cljvindent.log");
+    let file_appender = rolling::daily(".cljvindent_logs", "cljvindent.log");
     let (file_writer, guard) = non_blocking(file_appender);
 
     let stdout_layer = fmt::layer().pretty().with_writer(std::io::stdout);
