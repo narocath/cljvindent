@@ -41,12 +41,12 @@
 
 Available commands:
 
-- `M-x cljvindent-format-current-form`
-- `M-x cljvindent-format-parent`
-- `M-x cljvindent-format-outer-parent`
-- `M-x cljvindent-format-top-level-form`
-- `M-x cljvindent-format-region`
-- `M-x cljvindent-align-whole-buffer`
+- `M-x cljvindent-current-form`
+- `M-x cljvindent-parent`
+- `M-x cljvindent-outer-parent`
+- `M-x cljvindent-top-level-form`
+- `M-x cljvindent-region`
+- `M-x cljvindent-whole-buffer`
 
 #### Customization
 

@@ -176,7 +176,7 @@ Return non-nil on success."
     result))
 
 ;;;###autoload
-(defun cljvindent-indent-current-form ()
+(defun cljvindent-current-form ()
   "Indent the current form at point."
   (interactive)
   (unless (cljvindent--supported-mode-p)
@@ -190,7 +190,7 @@ Return non-nil on success."
              (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-indent-top-level-form ()
+(defun cljvindent-top-level-form ()
   "Indent the top-level form at point."
   (interactive)
   (unless (cljvindent--supported-mode-p)
@@ -204,7 +204,7 @@ Return non-nil on success."
              (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-indent-parent ()
+(defun cljvindent-parent ()
   "Indent the parent form of the current form."
   (interactive)
   (unless (cljvindent--supported-mode-p)
@@ -218,7 +218,7 @@ Return non-nil on success."
              (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-indent-outer-parent ()
+(defun cljvindent-outer-parent ()
   "Indent the outer parent form of the current form."
   (interactive)
   (unless (cljvindent--supported-mode-p)
@@ -232,7 +232,7 @@ Return non-nil on success."
              (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-indent-region ()
+(defun cljvindent-region ()
   "Indent the active region."
   (interactive)
   (unless (cljvindent--supported-mode-p)
@@ -246,7 +246,7 @@ Return non-nil on success."
              (float-time (time-subtract (current-time) start-time)))))
 
 ;;;###autoload
-(defun cljvindent-indent-whole-buffer ()
+(defun cljvindent-whole-buffer ()
   "Indent the whole file of the current buffer."
   (interactive)
   (unless (cljvindent--supported-mode-p)
