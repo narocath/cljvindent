@@ -1,10 +1,10 @@
 # cljvindent-emacs
 
-`cljvindent-emacs` is an Emacs package built on top of `cljvindent`, an indentation and alignment engine for Clojure, ClojureScript, and EDN.
+`cljvindent-emacs` is an Emacs package built on top of `cljvindent`, an indentation and alignment tool for Clojure, ClojureScript, and EDN.
 
 [`cljvindent`](https://github.com/narocath/cljvindent) is written in Rust and was created for speed, especially when indenting large regions and whole file buffers.
 
-`cljvindent-emacs` builds the core engine as a native Emacs module and uses it to indent source code directly from Emacs. By default, the package offers to build the native module automatically on first use.
+`cljvindent-emacs` builds the core tool as a native Emacs module and uses it to indent source code directly from Emacs. By default, the package offers to build the native module automatically on first use.
 
 Some form indentation follows a specific style and includes a few mild layout preferences, but nothing too extreme.
 

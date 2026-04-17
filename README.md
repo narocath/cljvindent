@@ -1,6 +1,6 @@
 # cljvindent
 
-`cljvindent` is a Rust indentation engine for Clojure, ClojureScript, and EDN. It's created for speed and for handling large regions and large files. Its core library can be used either through the CLI as a standalone executable that can accept either a string or a path for a whole file or through an Emacs package that loads it as a native module. Some form indentation follow a specific style and include a few mild layout preferences, but nothing too extreme.
+`cljvindent` is a Rust indentation tool for Clojure, ClojureScript, and EDN. It's created for speed and for handling large regions and large files. Its core library can be used either through the CLI as a standalone executable that can accept either a string or a path for a whole file or through an Emacs package that loads it as a native module. Some form indentation follow a specific style and include a few mild layout preferences, but nothing too extreme.
 
 ## Features
 
