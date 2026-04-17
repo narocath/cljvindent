@@ -8,7 +8,7 @@ repository = "https://github.com/narocath/cljvindent"
 
 [lib]
 name = "cljvindent"
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
 
 [features]
 default = []
