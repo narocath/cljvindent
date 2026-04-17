@@ -1,5 +1,8 @@
 ;;; cljvindent-build.el --- Build and install the cljvindent native module -*- lexical-binding: t; -*-
 
+;; Copyright (C) 2026 Your Panagiotis Koromilias
+;; SPDX-License-Identifier: Apache-2.0
+
 ;; Author: Panagiotis Koromilias
 ;; Version: 0.1.0
 
