@@ -19,6 +19,11 @@
   "Clojure, Clojurescript and EDN, indentation with a native module."
   :group 'applications)
 
+(defcustom cljvindent-clean-after-build t
+  "Whether to remove Cargo build artifacts after a successful install."
+  :group 'cljvindent
+  :type 'boolean)
+
 (defcustom cljvindent-build-command
   '("cargo" "build" "--release" "--features" "emacs-module")
   "Full command used to build the cljvindent native module."
@@ -117,6 +122,7 @@
   "Build the cljvindent native module and install it in the package directory."
   (interactive)
   (cljvindent--ensure-rust-toolchain)
+  (save-some-buffers t)
   (let* ((rust-dir (cljvindent--rust-project-dir))
          (manifest (cljvindent--cargo-manifest-file))
          (command cljvindent-build-command)
@@ -124,21 +130,27 @@
          (args (append (cdr command)
                        (list "--manifest-path" manifest)))
          (buf (get-buffer-create "*cljvindent-build*"))
-         (needs-restart (bound-and-true-p cljvindent--module-loaded)))
+         (needs-restart (bound-and-true-p cljvindent--module-loaded))
+         (default-directory rust-dir))
     (unless (file-directory-p rust-dir)
       (user-error "Module's project directory does not exist: %s" rust-dir))
     (unless (file-exists-p manifest)
       (user-error "No Cargo.toml found in: %s" manifest))
     (with-current-buffer buf
-      (erase-buffer))
+      (let ((inhibit-read-only t))
+        (erase-buffer))
+      (special-mode))
+
     (pop-to-buffer buf)
     (redisplay)
-    (let ((status (let ((inhibit-read-only t))
-                    (save-some-buffers t)
-                    (apply #'process-file program nil buf t args))))
+    (let ((status
+           (with-current-buffer buf
+             (let ((inhibit-read-only t))
+               (apply #'process-file program nil buf t args)))))
       (unless (eq status 0)
         (pop-to-buffer buf)
         (user-error "Module cljvindent: build failed")))
+
     (let ((built (cljvindent--find-built-module))
           (dest (cljvindent--installed-module-file)))
       (unless built
@@ -146,10 +158,19 @@
         (user-error "Module cljvindent: built module not found in %s"
                     (cljvindent--cargo-target-dir)))
       (copy-file built dest t)
+      (when cljvindent-clean-after-build
+        (let ((clean-status
+               (with-current-buffer buf
+                 (let ((inhibit-read-only t))
+                   (process-file program nil buf t
+                                 "clean"
+                                 "--manifest-path" manifest)))))
+          (unless (eq clean-status 0)
+            (message "Module cljvindent: build and install succeeded, but cargo clean failed"))))
       (message
        (if needs-restart
-           "Module cljvindent: rebuilt at %s. Restart Emacs to use the new version"
-         "Module cljvindent: installed native module to %s")
+           "Module cljvindent: build succeeded and installed module to %s. Restart Emacs to use the new version"
+         "Module cljvindent: build succeeded and installed native module to %s")
        dest)
       dest)))
 
