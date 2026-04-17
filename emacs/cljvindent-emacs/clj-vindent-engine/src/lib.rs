@@ -2,7 +2,6 @@ mod indentation_engine;
 use std::sync::{Mutex, OnceLock};
 use tracing_appender::{non_blocking, rolling};
 use tracing_subscriber::{fmt, layer::Layer, registry::Registry, filter::LevelFilter, prelude::*};
-use clap::ValueEnum;
 
 static LOG_GUARD: OnceLock<Mutex<Option<tracing_appender::non_blocking::WorkerGuard>>> =
     OnceLock::new();
