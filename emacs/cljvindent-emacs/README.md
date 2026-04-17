@@ -40,12 +40,6 @@ Some form indentation follows a specific style and includes a few mild layout pr
 - Rust
 - Cargo available in `PATH`
 
-## Installation
-
-Install `cljvindent-emacs` from MELPA.
-
-On first use, the package will offer to build the native module automatically.
-
 ## Usage
 
 ### Emacs
