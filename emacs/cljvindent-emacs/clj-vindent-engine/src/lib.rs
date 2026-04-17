@@ -19,20 +19,20 @@ pub use indentation_engine::{
     indent_clojure_string_collection,
 };
 
-#[derive(Copy, Clone, Debug, ValueEnum)]
+#[derive(Copy, Clone, Debug)]
 pub enum LogOutputType {
     Json,
     Compact
 }
 
-#[derive(Copy, Clone, Debug, ValueEnum)]
+#[derive(Copy, Clone, Debug)]
 pub enum LogMode {
     Off,
     Stdout,
     StdoutFile,
 }
 
-#[derive(Copy, Clone, Debug, ValueEnum)]
+#[derive(Copy, Clone, Debug)]
 pub enum LogLevel {
     Info,
     Debug
