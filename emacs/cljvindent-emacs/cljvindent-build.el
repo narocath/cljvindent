@@ -113,10 +113,9 @@
   (unless (cljvindent--find-executable "rustc")
     (user-error "Could not find rustc executable")))
 
-(defun cljvindent-build-module (&optional force)
-  "Build the cljvindent native module and install it in the package directory.
-With FORCE, will clean first then build."
-  (interactive "P")
+(defun cljvindent-build-module ()
+  "Build the cljvindent native module and install it in the package directory."
+  (interactive)
   (cljvindent--ensure-rust-toolchain)
   (let* ((rust-dir (cljvindent--rust-project-dir))
          (manifest (cljvindent--cargo-manifest-file))
@@ -125,30 +124,21 @@ With FORCE, will clean first then build."
          (args (append (cdr command)
                        (list "--manifest-path" manifest)))
          (buf (get-buffer-create "*cljvindent-build*"))
-         (needs-restart (bound-and-true-p cljvindent--module-loaded))
-         (default-directory rust-dir))
+         (needs-restart (bound-and-true-p cljvindent--module-loaded)))
     (unless (file-directory-p rust-dir)
       (user-error "Module's project directory does not exist: %s" rust-dir))
     (unless (file-exists-p manifest)
       (user-error "No Cargo.toml found in: %s" manifest))
     (with-current-buffer buf
-      (let ((inhibit-read-only t))
-        (erase-buffer))
-      (special-mode))
+      (erase-buffer))
     (pop-to-buffer buf)
     (redisplay)
-    (when force
-      (let ((clean-status
-             (process-file program nil buf t "clean" "--manifest-path" manifest)))
-        (unless (eq clean-status 0)
-          (pop-to-buffer buf)
-          (user-error "Module cljvindent: clean failed"))))
-
-    (let ((status (apply #'process-file program nil buf t args)))
+    (let ((status (let ((inhibit-read-only t))
+                    (save-some-buffers t)
+                    (apply #'process-file program nil buf t args))))
       (unless (eq status 0)
         (pop-to-buffer buf)
         (user-error "Module cljvindent: build failed")))
-
     (let ((built (cljvindent--find-built-module))
           (dest (cljvindent--installed-module-file)))
       (unless built
@@ -170,7 +160,7 @@ With FORCE, will clean first then build."
   (let ((dest (cljvindent--installed-module-file)))
     (when (file-exists-p dest)
       (delete-file dest))
-    (cljvindent-build-module t)))
+    (cljvindent-build-module)))
 
 (provide 'cljvindent-build)
 ;;; cljvindent-build.el ends here
