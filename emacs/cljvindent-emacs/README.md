@@ -92,6 +92,7 @@ Available commands:
 (add-hook 'clojure-mode-hook
           (lambda ()
             (add-hook 'before-save-hook #'cljvindent-outer-parent nil t)))
+
 ;; or
 (with-eval-after-load 'clojure-mode
   (define-key clojure-mode-map (kbd "C-c i c") #'cljvindent-current-form)
@@ -99,6 +100,17 @@ Available commands:
   (define-key clojure-mode-map (kbd "C-c i o") #'cljvindent-outer-parent)
   (define-key clojure-mode-map (kbd "C-c i t") #'cljvindent-top-level-form))
 ```
+
+##### Note
+`cljvindent-whole-buffer` will update the file on disk so it would not work on a `before-save-hook`, it would need to run on `after-save-hook` like:
+
+``` emacs-lisp
+(add-hook 'clojure-mode-hook
+          (lambda ()
+            (add-hook 'after-save-hook #'cljvindent-whole-buffer nil t)))
+```
+
+
 
 #### Customization
 
