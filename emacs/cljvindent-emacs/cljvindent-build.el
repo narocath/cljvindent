@@ -15,8 +15,8 @@
 
 (require 'cl-lib)
 
-(defconst cljvindent--module-name "cljvindent"
-  "Base name of the cljvindent native module.")
+(defconst cljvindent--installed-module-name "cljvindent-native")
+(defconst cljvindent--built-module-name "cljvindent")
 
 (defgroup cljvindent nil
   "Clojure, Clojurescript and EDN, indentation with a native module."
@@ -83,7 +83,7 @@
 (defun cljvindent--installed-module-file ()
   "Return the installed module path."
   (expand-file-name
-   (concat cljvindent--module-name module-file-suffix)
+   (concat cljvindent--installed-module-name module-file-suffix)
    (cljvindent--package-dir)))
 
 (defun cljvindent--cargo-target-dir ()
@@ -94,8 +94,8 @@
 (defun cljvindent--built-module-candidates ()
   "Return possible built module filenames."
   (let* ((suffix module-file-suffix)
-         (plain (concat cljvindent--module-name suffix))
-         (libprefixed (concat "lib" cljvindent--module-name suffix)))
+         (plain (concat cljvindent--built-module-name suffix))
+         (libprefixed (concat "lib" cljvindent--built-module-name suffix)))
     (delete-dups
      (list (expand-file-name plain (cljvindent--cargo-target-dir))
            (expand-file-name libprefixed (cljvindent--cargo-target-dir))))))
