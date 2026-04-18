@@ -372,20 +372,24 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
                                                          :update :update-flow
                                                          :delete :delete-flow
                                                          :unknown-flow)
+
                                            :meta       (cond
                                                          (= status :new)        :demo/fresh
                                                          (= status :processing) :demo/active
                                                          (= status :failed)     :demo/failed
                                                          :else                  :demo/other)
+
                                            :payload    (condp = (:country payload)
                                                          "GR" :local
                                                          "DE" :eu
                                                          "US" :>> (fn [_] :demo/us-special)
                                                          "UK" :>> (fn [_] {:region :uk :vat true})
                                                          :intl)
+
                                            :normalized normalized}
                                           {:route  :disabled
                                            :reason :demo/event-disabled})))
+
                   :batch-builder    (fn [rows]
                                       (let [prepared (cond->> rows
                                                        true (filter map?)
@@ -405,6 +409,7 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
                                                     :small  :>> (fn [_] [:few :demo/batched])
                                                     :bulk   :>> (fn [_] [:many :demo/batched])
                                                     [:unknown])}))
+
                   :permission-check (fn [user action]
                                       (let [role  (:role user)
                                             flags (:flags user [])]
@@ -417,11 +422,13 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
                                                      [:manager :write] :>> (fn [_] (boolean (:can-write user)))
                                                      [:guest :read]    true
                                                      false)
+
                                          :reason   (case action
                                                      :read   :demo/read-check
                                                      :write  :demo/write-check
                                                      :delete :demo/delete-check
                                                      :demo/unknown-action)}))
+
                   :maybe-enrich     (fn [m]
                                       (when-let [profile (:profile m)]
                                         (let [country (:country profile)
@@ -431,6 +438,7 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
                                             tier             (assoc :tier tier)
                                             (= tier :gold)   (assoc :discount 20)
                                             (= tier :silver) (assoc :discount 10)))))
+
                   :shape-response   (fn [resp]
                                       (let [base {:ok   true
                                                   :data (:data resp)}]
@@ -447,6 +455,7 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
 
                                             :else           (assoc base :code 200))
                                           (assoc base :code 204 :skipped true))))
+
                   :config           {:compile (fn [cfg]
                                                 (let [mode   (:mode cfg)
                                                       steps  (:steps cfg [])
@@ -458,6 +467,7 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
                                                   (if-not (empty? steps)
                                                     (assoc result :steps (vec steps))
                                                     (assoc result :steps []))))
+
                                      :runtime (fn [cfg]
                             (let [hooks (cond->> (:hooks cfg [])
                                       true (filter keyword?)
@@ -470,6 +480,7 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
                                     :stage :>> (fn [_] {:name :stage :level 2})
                                     :prod  :>> (fn [_] {:name :prod :level 3})
                                     :unknown)
+
                             :hooks hooks}))}}}}
 "#;
     (inp, expected)
