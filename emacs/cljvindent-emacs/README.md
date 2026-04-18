@@ -40,6 +40,38 @@ Some form indentation follows a specific style and includes a few mild layout pr
 - Rust
 - Cargo available in `PATH`
 
+## Installation
+
+### Doom Emacs
+
+Add this to `~/.doom.d/packages.el`:
+
+```emacs-lisp
+(package! cljvindent
+  :recipe (:host github
+           :repo "narocath/cljvindent-emacs"
+           :files (:defaults
+                   "clj-vindent-engine")))
+```
+Then run:
+
+``` shell
+doom sync
+```
+
+### Vanilla Emacs
+
+Install the package from source:
+
+```elisp
+(package-vc-install
+ '(cljvindent :url "https://github.com/narocath/cljvindent-emacs"))
+```
+
+``` emacs-lisp
+(require 'cljvindent)
+```
+
 ## Usage
 
 ### Emacs
@@ -52,6 +84,25 @@ Available commands:
 - `M-x cljvindent-top-level-form`
 - `M-x cljvindent-region`
 - `M-x cljvindent-whole-buffer`
+
+#### Example usage
+
+``` emacs-lisp
+
+(add-hook 'clojure-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook #'cljvindent-outer-parent nil t)))
+;; or
+(add-hook 'clojure-mode-hook
+          (lambda ()
+            (add-hook 'before-save-hook #'cljvindent-whole-buffer nil t)))
+;; or
+(with-eval-after-load 'clojure-mode
+  (define-key clojure-mode-map (kbd "C-c i c") #'cljvindent-current-form)
+  (define-key clojure-mode-map (kbd "C-c i p") #'cljvindent-parent)
+  (define-key clojure-mode-map (kbd "C-c i o") #'cljvindent-outer-parent)
+  (define-key clojure-mode-map (kbd "C-c i t") #'cljvindent-top-level-form))
+```
 
 #### Customization
 
