@@ -110,7 +110,7 @@ pub fn build_aligned_map_string(src: &str, pairs: &[Pair], base_col: usize) -> S
                 out.push('{');
             }
         } else {
-            out.push('\n');
+            out.push_str(&src[last..line_start]);
             out.push_str(&" ".repeat(target_lhs_col));
         }
 
