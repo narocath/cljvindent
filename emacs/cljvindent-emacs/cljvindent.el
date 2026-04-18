@@ -57,7 +57,7 @@ Return non-nil on success."
   (or (cljvindent--load-module)
       (when cljvindent-auto-build-module
         (when (y-or-n-p "Module cljvindent is missing. Build it now? ")
-          (cljvindent-build-module)
+          (cljvindent--build-module)
           (cljvindent--load-module)))
       (user-error "Module cljvindent is not available")))
 
@@ -66,7 +66,7 @@ Return non-nil on success."
   "Build and load the cljvindent native module."
   (interactive)
   (let ((was-loaded cljvindent--module-loaded))
-    (cljvindent-build-module)
+    (cljvindent--build-module)
     (cond
      (was-loaded
       (message "Native module rebuilt. Restart Emacs to use the new version"))
