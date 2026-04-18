@@ -9,7 +9,7 @@ use tracing_subscriber::{filter::LevelFilter};
 emacs::plugin_is_GPL_compatible!();
 
 #[emacs::module(
-    name = "cljvindent",
+    name = "cljvindent-native",
     defun_prefix = "cljvindent",
     separator = "--",
     mod_in_name = false

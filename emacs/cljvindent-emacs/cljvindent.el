@@ -32,6 +32,8 @@
 (defvar cljvindent--module-loaded nil
   "Non-nil once the native module has been loaded.")
 
+(defconst cljvindent--native-feature 'cljvindent-native)
+
 (defun cljvindent--module-file ()
   "Return cljvindent module file path."
   (expand-file-name
@@ -43,12 +45,13 @@
 (defun cljvindent--load-module ()
   "Load the native module if present.
 Return non-nil on success."
-  (unless cljvindent--module-loaded
+  (unless (or cljvindent--module-loaded
+              (featurep cljvindent--native-feature))
     (let ((module (cljvindent--module-file)))
       (when (file-exists-p module)
-        (load (file-name-sans-extension module) nil 'nomessage)
-        (setq cljvindent--module-loaded t))))
-  cljvindent--module-loaded)
+        (load module nil 'nomessage t))))
+  (setq cljvindent--module-loaded
+        (featurep cljvindent--native-feature)))
 
 (defun cljvindent--ensure-module ()
   "Ensure the cljvindent native module exists and is loaded."
