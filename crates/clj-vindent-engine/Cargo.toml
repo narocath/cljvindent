@@ -7,7 +7,7 @@ edition.workspace = true
 
 
 [lib]
-name = "cljvindent"
+name = "clj_vindent_engine"
 crate-type = ["cdylib", "rlib"]
 
 [features]
