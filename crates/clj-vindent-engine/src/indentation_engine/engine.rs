@@ -3,6 +3,7 @@ use std::fs;
 use tree_sitter::Node;
 use std::time::Instant;
 
+use crate::helpers::line_start_byte;
 use crate::indentation_engine::alignable::Alignable;
 use crate::indentation_engine::aligners::{
     cond_like::CondLikeAligner,
@@ -130,13 +131,15 @@ pub fn indent_whole_file_parallel(src: &str) -> String {
 
     let ranges: Vec<(usize, usize)> = top_forms
         .into_par_iter()
-        .map(|form| (form.start_byte(), form.end_byte()))
+        // start from the start of the line always
+        .map(|form| (line_start_byte(src, form.start_byte()), form.end_byte()))
         .collect();
 
     let mut pieces: Vec<(usize, usize, String)> = ranges
         .into_par_iter()
         .map(|(start, end)| {
-            let slice = &src[start..end];
+            // trim everything from the start of the line as it's a top level form
+            let slice = &src[start..end].trim_start_matches(|c| c == ' ' || c == '\t');
             let formatted = indent_bottom_up(slice, 0);
             (start, end, formatted)
         })
