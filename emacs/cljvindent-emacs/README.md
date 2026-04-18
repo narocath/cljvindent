@@ -93,10 +93,6 @@ Available commands:
           (lambda ()
             (add-hook 'before-save-hook #'cljvindent-outer-parent nil t)))
 ;; or
-(add-hook 'clojure-mode-hook
-          (lambda ()
-            (add-hook 'before-save-hook #'cljvindent-whole-buffer nil t)))
-;; or
 (with-eval-after-load 'clojure-mode
   (define-key clojure-mode-map (kbd "C-c i c") #'cljvindent-current-form)
   (define-key clojure-mode-map (kbd "C-c i p") #'cljvindent-parent)
