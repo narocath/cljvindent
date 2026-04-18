@@ -121,7 +121,7 @@
   (unless (cljvindent--find-executable "rustc")
     (user-error "Could not find rustc executable")))
 
-(defun cljvindent-build-module ()
+(defun cljvindent--build-module ()
   "Build the cljvindent native module and install it in the package directory."
   (interactive)
   (cljvindent--ensure-rust-toolchain)
@@ -184,7 +184,7 @@
   (let ((dest (cljvindent--installed-module-file)))
     (when (file-exists-p dest)
       (delete-file dest))
-    (cljvindent-build-module)))
+    (cljvindent--build-module)))
 
 (provide 'cljvindent-build)
 ;;; cljvindent-build.el ends here
