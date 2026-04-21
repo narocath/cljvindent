@@ -122,7 +122,7 @@ name = "cljvindent-cli"
 version = "0.1.0"
 dependencies = [
  "clap",
- "cljvindent-core",
+ "cljvindent-core 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
@@ -134,6 +134,20 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "pretty_assertions",
+ "rayon",
+ "rstest",
+ "tracing",
+ "tree-sitter",
+ "tree-sitter-clojure",
+]
+
+[[package]]
+name = "cljvindent-core"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "409ceb1478071d929a83e6721c63bdb47aa12aca6c5f417b1bc5f0bded8afe39"
+dependencies = [
+ "clap",
  "rayon",
  "rstest",
  "tracing",
