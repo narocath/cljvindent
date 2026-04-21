@@ -1,6 +1,6 @@
 use rstest::rstest;
 use pretty_assertions;
-use clj_vindent_engine::{indent_bottom_up, AlignKind};
+use cljvindent_core::{indent_bottom_up, AlignKind};
 
 mod fixtures;
 

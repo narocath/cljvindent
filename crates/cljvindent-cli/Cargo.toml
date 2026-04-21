@@ -1,5 +1,5 @@
 [package]
-name = "clj-vindent-cli"
+name = "cljvindent-cli"
 license.workspace = true
 repository.workspace = true
 version.workspace = true
@@ -10,7 +10,7 @@ name = "cljvindent"
 path = "src/main.rs"
 
 [dependencies]
-cljvindent = { package = "clj-vindent-engine", path = "../clj-vindent-engine" }
+cljvindent-core = { package = "cljvindent-core", path = "../cljvindent-core" }
 clap = { version = "4.6", features = ["derive"] }
 tracing = {version = "0.1.44", features = ["attributes"]}
 tracing-subscriber = { version = "0.3", features = ["json"] }

@@ -1,5 +1,5 @@
 use rstest::fixture;
-use clj_vindent_engine::{engine::find_aligner, AlignKind, helpers::{get_tree, get_root_node}};
+use cljvindent_core::{engine::find_aligner, AlignKind, helpers::{get_tree, get_root_node}};
 
 #[fixture]
 pub fn simple_thread_first() -> (&'static str, &'static str) {
