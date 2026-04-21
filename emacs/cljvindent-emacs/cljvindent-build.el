@@ -28,7 +28,7 @@
   :type 'boolean)
 
 (defcustom cljvindent-build-command
-  '("cargo" "build" "--release" "--features" "emacs-module")
+  '("cargo" "build" "--release" "--lib")
   "Full command used to build the cljvindent native module."
   :group 'cljvindent
   :type '(repeat string))
@@ -71,14 +71,9 @@
   "Return the cljvindent project root."
   cljvindent--package-dir)
 
-(defun cljvindent--rust-project-dir ()
-  "Return the native's module project directory."
-  (expand-file-name "clj-vindent-engine" cljvindent--package-dir))
-
 (defun cljvindent--cargo-manifest-file ()
   "Return the Cargo.toml path for the native project."
-  (expand-file-name "Cargo.toml"
-                    (cljvindent--rust-project-dir)))
+  (expand-file-name "Cargo.toml" (cljvindent--project-root)))
 
 (defun cljvindent--installed-module-file ()
   "Return the installed module path."
@@ -88,8 +83,7 @@
 
 (defun cljvindent--cargo-target-dir ()
   "Return the module target/release directory."
-  (expand-file-name "target/release/"
-                    (cljvindent--rust-project-dir)))
+  (expand-file-name "target/release/" (cljvindent--project-root)))
 
 (defun cljvindent--built-module-candidates ()
   "Return possible built module filenames."
@@ -126,7 +120,7 @@
   (interactive)
   (cljvindent--ensure-rust-toolchain)
   (save-some-buffers t)
-  (let* ((rust-dir (cljvindent--rust-project-dir))
+  (let* ((project-dir (cljvindent--project-root))
          (manifest (cljvindent--cargo-manifest-file))
          (command cljvindent-build-command)
          (program (car command))
@@ -134,9 +128,9 @@
                        (list "--manifest-path" manifest)))
          (buf (get-buffer-create "*cljvindent-build*"))
          (needs-restart (bound-and-true-p cljvindent--module-loaded))
-         (default-directory rust-dir))
-    (unless (file-directory-p rust-dir)
-      (user-error "Module's project directory does not exist: %s" rust-dir))
+         (default-directory project-dir))
+    (unless (file-directory-p project-dir)
+      (user-error "Module's project directory does not exist: %s" project-dir))
     (unless (file-exists-p manifest)
       (user-error "No Cargo.toml found in: %s" manifest))
     (with-current-buffer buf

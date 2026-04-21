@@ -3,3 +3,9 @@
 /.projectile
 .DS_Store
 logs/
+debug
+target
+**/*.rs.bk
+# MSVC Windows builds of rustc generate these, which store debugging information
+*.pdb
+**/mutants.out*/
