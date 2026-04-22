@@ -126,45 +126,69 @@ pub fn indent_bottom_up(src: &str, base_col: usize) -> String {
 
 #[instrument(skip(src))]
 pub fn indent_whole_file_parallel(src: &str) -> String {
+    // Helper so will not put in new line comments or uneval forms
+    let is_comment_or_uneval = |s: &str| {
+        let t = s.trim_start();
+        t.starts_with(";;") || t.starts_with("#_")
+    };
+
     let tree = get_tree(src).expect("parse failed");
-    info!("Parsing root node");
-    let root = get_root_node(&tree).unwrap(); 
+    let root = get_root_node(&tree).unwrap();
     let top_forms = named_children(root);
     let num_of_top_forms = top_forms.len();
-
-    if top_forms.par_iter().any(|form| has_missing_or_error(*form, &src)) {
-        panic!("whole-file parse error: malformed, missing, or unbalanced top-level form");
-    }
     
     info!("Number of top forms {}", num_of_top_forms);
 
-    let ranges: Vec<(usize, usize)> = top_forms
+    // For each top-level form:
+    // - get its exact byte range
+    // - keep the original slice
+    // - indent it if valid
+    // - otherwise keep it unchanged
+    let mut pieces: Vec<(usize, usize, String, String)> = top_forms
         .into_par_iter()
-        // start from the start of the line always
-        .map(|form| (line_start_byte(src, form.start_byte()), form.end_byte()))
-        .collect();
+        .map(|form| {
+            let start = form.start_byte();
+            let end = form.end_byte();
+            let slice = &src[start..end];
 
-    let mut pieces: Vec<(usize, usize, String)> = ranges
-        .into_par_iter()
-        .map(|(start, end)| {
-            // trim everything from the start of the line as it's a top level form
-            let slice = &src[start..end].trim_start_matches(|c| c == ' ' || c == '\t');
-            let formatted = indent_bottom_up(slice, 0);
-            (start, end, formatted)
+            let replacement =
+                if has_missing_or_error(form, src) {
+                    slice.to_string()
+                } else {
+                    indent_bottom_up(slice, 0)
+                };
+
+            (start, end, slice.to_string(), replacement)
         })
         .collect();
-
-    pieces.sort_by_key(|(start, _, _)| *start);
+    //ensure order after parallel collection
+    pieces.sort_by_key(|(start, _, _, _)| *start);
 
     let mut out = String::with_capacity(src.len());
     let mut last = 0;
+    let mut first = true;
 
-    for (start, end, replacement) in pieces {
-        out.push_str(&src[last..start]);
+    for (start, end, original, replacement) in pieces {
+        // Text between the previous top-level form and this one.
+        // We use it to preserve spacing/comments already present in the file.
+        let between = &src[last..start];
+
+        if first {
+            out.push_str(between);
+            first = false;
+        } else if between.contains('\n') || is_comment_or_uneval(&original) {
+            // keep existing newlines between forms.
+            // keep original spacing for comments / #_ nodes.
+            out.push_str(between);
+        } else {
+            // If a real top-level form is trailing right after another one on the same line, force it to new line.
+            out.push('\n');
+        }
+
         out.push_str(&replacement);
         last = end;
     }
-
+    // Preserve after the last top-level form.
     out.push_str(&src[last..]);
     out
 }
