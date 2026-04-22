@@ -49,7 +49,8 @@ Return non-nil on success."
   (unless (featurep cljvindent--native-feature)
     (let ((module (cljvindent--module-file)))
       (when (file-exists-p module)
-        (load module nil 'nomessage t))))
+        (load module nil 'nomessage t)
+        (setq cljvindent--module-loaded t))))
   (featurep cljvindent--native-feature))
 
 (defun cljvindent--ensure-module ()
