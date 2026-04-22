@@ -3,7 +3,7 @@ use std::fs;
 use tree_sitter::Node;
 use std::time::Instant;
 
-use crate::helpers::line_start_byte;
+use crate::helpers::{node_text, line_start_byte};
 use crate::indentation_engine::alignable::Alignable;
 use crate::indentation_engine::aligners::{
     cond_like::CondLikeAligner,
@@ -62,9 +62,18 @@ pub fn indent_current_form_once(source: &str, base_col: usize) -> String {
         None => source.to_string(),
     }
 }
-fn has_missing_or_error(node: Node) -> bool {
+fn has_missing_or_error(node: Node, src: &str) -> bool {
     let result = node.is_error() || node.is_missing() || node.has_error();
-    if result {error!("Whole Node parse error: malformed, missing, or unbalanced form");};
+    if result {
+        error!(
+            "Whole node parse error: kind={}\n, missing={}\n, error={}\n, has_error={}\n, text={:?}",
+            node.kind(),
+            node.is_missing(),
+            node.is_error(),
+            node.has_error(),
+            node_text(node, src)
+        );
+    }
     result
 }
 
@@ -75,7 +84,7 @@ pub fn format_form_recursive(src: &str, base_col: usize) -> String {
     };
 
     let root = tree.root_node();
-    assert!(!has_missing_or_error(root),
+    assert!(!has_missing_or_error(root, &src),
     "Format-form: parse error: malformed, missing, or unbalanced form");
     
     let form = match root.named_child(0) {
@@ -123,7 +132,7 @@ pub fn indent_whole_file_parallel(src: &str) -> String {
     let top_forms = named_children(root);
     let num_of_top_forms = top_forms.len();
 
-    if top_forms.par_iter().any(|form| has_missing_or_error(*form)) {
+    if top_forms.par_iter().any(|form| has_missing_or_error(*form, &src)) {
         panic!("whole-file parse error: malformed, missing, or unbalanced top-level form");
     }
     
