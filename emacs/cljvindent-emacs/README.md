@@ -51,7 +51,7 @@ Add this to `~/.doom.d/packages.el`:
   :recipe (:host github
            :repo "narocath/cljvindent-emacs"
            :files (:defaults
-                   "clj-vindent-engine")))
+                   "Cargo.toml" "src")))
 ```
 Then run:
 
