@@ -11,7 +11,7 @@ name = "cljvindent"
 crate-type = ["cdylib"]
 
 [dependencies]
-cljvindent-core = "0.1.1"
+cljvindent-core = "0.1.2"
 tracing = {version = "0.1.44", features = ["attributes"]}
 tracing-subscriber = { version = "0.3", features = ["json"] }
 tracing-appender = "0.2"
