@@ -136,51 +136,55 @@ pub fn complex_cond() -> (&'static str, &'static str) {
 "#;
     let expected = r#"
 (cond
-  (= mode :user)    (let [profile (-> data
-                                      :user
-                                      (select-keys [:id :name :email :active?]))
-                          clean   (-> profile
-                                      (update :name #(some-> % clojure.string/trim))
-                                      (assoc :kind :user))]
-                      (when-not (:active? clean)
-                        (println "inactive user"))
-                      (if (:email clean)
-                        {:ok     true
-                         :entity clean
-                         :meta   {:source :user-branch}}
-                        {:ok     false
-                         :entity clean
-                         :error  :missing-email}))
+  (= mode :user)
+  (let [profile (-> data
+                    :user
+                    (select-keys [:id :name :email :active?]))
+        clean   (-> profile
+                    (update :name #(some-> % clojure.string/trim))
+                    (assoc :kind :user))]
+    (when-not (:active? clean)
+      (println "inactive user"))
+    (if (:email clean)
+      {:ok     true
+       :entity clean
+       :meta   {:source :user-branch}}
+      {:ok     false
+       :entity clean
+       :error  :missing-email}))
 
-  (= mode :orders)  (let [orders (->> (:orders data)
-                                      (filter map?)
-                                      (map #(select-keys % [:id :total :status]))
-                                      vec)
-                          paid   (->> orders
-                                      (filter #(= :paid (:status %)))
-                                      count)]
-                      (if-not (empty? orders)
-                        {:ok     true
-                         :orders orders
-                         :stats  {:paid-count  paid
-                                  :total-count (count orders)}}
-                        {:ok     false
-                         :orders []
-                         :stats  {:paid-count  0
-                                  :total-count 0}}))
+  (= mode :orders)
+  (let [orders (->> (:orders data)
+                    (filter map?)
+                    (map #(select-keys % [:id :total :status]))
+                    vec)
+        paid   (->> orders
+                    (filter #(= :paid (:status %)))
+                    count)]
+    (if-not (empty? orders)
+      {:ok     true
+       :orders orders
+       :stats  {:paid-count  paid
+                :total-count (count orders)}}
+      {:ok     false
+       :orders []
+       :stats  {:paid-count  0
+                :total-count 0}}))
 
-  (= mode :summary) (let [summary (cond-> {:source :demo
-                                           :mode   mode}
-                                    (:debug? data)   (assoc :debug true)
-                                    (:trace-id data) (assoc :trace-id (:trace-id data)))]
-                      (when-not silent?
-                        (println "building summary"))
-                      {:ok true:summary summary})
+  (= mode :summary)
+  (let [summary (cond-> {:source :demo
+                         :mode   mode}
+                  (:debug? data)   (assoc :debug true)
+                  (:trace-id data) (assoc :trace-id (:trace-id data)))]
+    (when-not silent?
+      (println "building summary"))
+    {:ok true:summary summary})
 
-  :else             (let [fallback {:ok     false
-                                    :reason :unsupported-mode
-                                    :meta   {:mode mode}}]
-                      fallback))
+  :else
+  (let [fallback {:ok     false
+                  :reason :unsupported-mode
+                  :meta   {:mode mode}}]
+    fallback))
 "#;
     (inp, expected)
 }

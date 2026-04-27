@@ -444,12 +444,13 @@ pub fn nested_map_with_everything() -> (&'static str, &'static str){
                                                   :data (:data resp)}]
                                         (if-not (:skip? resp)
                                           (cond
-                                            (:error resp)   {:ok   false
-                                                             :code (case (:error resp)
-                                                                     :timeout   504
-                                                                     :not-found 404
-                                                                     :conflict  409
-                                                                     500)}
+                                            (:error resp)
+                                            {:ok   false
+                                             :code (case (:error resp)
+                                                     :timeout   504
+                                                     :not-found 404
+                                                     :conflict  409
+                                                     500)}
 
                                             (:warning resp) (assoc base :warning (:warning resp))
 

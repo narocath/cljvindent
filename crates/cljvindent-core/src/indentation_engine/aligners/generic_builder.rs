@@ -2,6 +2,9 @@ use crate::indentation_engine::model::Pair;
 
 use crate::indentation_engine::helpers::{absolute_col_in_slice,
                                          line_start_byte,
+                                         get_tree, get_root_node,
+                                         non_comment_children,
+                                         node_text,
                                          shift_multiline_block};
 use tracing::debug;
 
@@ -10,11 +13,24 @@ fn rendered_last_line_width(s: &str) -> usize {
     s.lines().last().map(|l| l.chars().count()).unwrap_or(0)
 }
 
+fn cond_like_head_text<'a>(src: &'a str) -> Option<&'a str> {
+    let tree = get_tree(src)?;
+    let root = get_root_node(&tree)?;
+    let form = root.named_child(0)?;
+    if form.kind() != "list_lit" {
+        return None;
+    }
+
+    let children = non_comment_children(form);
+    let head = *children.first()?;
+    Some(node_text(head.child(0)?, src))
+}
+
 pub fn build_aligned_string(src: &str, pairs: &[Pair], base_col: usize) -> String {
     if pairs.is_empty() {
         return src.to_string();
     }
-
+    let head_text = cond_like_head_text(src).unwrap_or("cond");
     let target_lhs_col = base_col + 2;
 
     let target_rhs_col = pairs
@@ -87,17 +103,18 @@ pub fn build_aligned_string(src: &str, pairs: &[Pair], base_col: usize) -> Strin
         out.push_str(&adjusted_lhs);
 
         if !pair.rh_string.is_empty() {
-            let rhs_on_next_line =
-                pair.lh_string.contains('\n') && pair.rh_string.contains('\n');
+            let rhs_line_count = pair.rh_string.lines().count();
+            let rhs_on_next_line = head_text == "cond" && pair.rh_string.lines().count() > 3;
 
             if rhs_on_next_line {
-                let rhs_col = target_lhs_col + 2;
+                let rhs_col = target_lhs_col;
 
                 debug!(
                     lhs = ?pair.lh_string,
                     rhs = ?pair.rh_string,
                     rhs_col,
-                    "placing multiline rhs on next line"
+                    rhs_line_count,
+                    "placing rhs on next line"
                 );
 
                 out.push('\n');
@@ -132,6 +149,7 @@ pub fn build_aligned_string(src: &str, pairs: &[Pair], base_col: usize) -> Strin
                     current_rhs_anchor,
                     spaces,
                     target_rhs_col,
+                    rhs_line_count,
                     "placing rhs on same line"
                 );
 
