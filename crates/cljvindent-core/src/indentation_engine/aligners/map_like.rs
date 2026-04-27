@@ -39,13 +39,7 @@ pub fn extract_map_pairs(nd: Node, src: &str) -> Option<Vec<Pair>> {
     for chunk in children.chunks(2) {
         let lhs = chunk[0];
         let rhs = chunk[1];
-        let key = node_text(lhs, src);
-
-        if matches!(key, ":keys" | ":strs" | ":syms" | ":as" | ":or") {
-            debug!("Bail out map is destructing form");
-            return None;
-        }
-
+        
         let line_start = line_start_byte(src, lhs.start_byte());
         if let Some(prev) = prev_line_start {
             if prev == line_start {
