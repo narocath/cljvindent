@@ -43,9 +43,14 @@ pub fn extract_cond_like_pairs(nd: Node, src: &str) -> Option<Vec<Pair>> {
             Some(rhs) => {
                 debug!("Cond like branch");
                 let lh_string = node_text(lhs, src).to_string();
+                let lh_width = if lh_string.contains('\n') {
+                    lh_string.lines().last().map(|l| l.trim_start().chars().count()).unwrap_or(0)
+                } else {
+                    lh_string.chars().count()
+                };
 
                 pairs.push(Pair {
-                    lh_width: lh_string.len(),
+                    lh_width,
                     lh_start_col: start_of_first_lh,
                     lh_string,
                     rh_string: node_text(rhs, src).to_string(),
