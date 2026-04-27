@@ -37,7 +37,7 @@ a                                           (fooo call foooo)
 (let [dummy-1                           0
       dummy-really-long-sym-really-long "foooooooo"
       a                                 (fooo call foooo)
-      {:keys [fooo faaa] :as res}        a]
+      {:keys [fooo faaa] :as res}       a]
   (do
     (foo1 a)
     (foo2 a)))

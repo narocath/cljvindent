@@ -108,7 +108,6 @@ pub fn build_aligned_let_body(
     out.push_str(&src[last..]);
     Some(last)
 }
-
 pub fn build_aligned_let_binding_vec(
     src: &str,
     pairs: &[Pair],
@@ -117,11 +116,17 @@ pub fn build_aligned_let_binding_vec(
     last_byte: usize,
     binding_vec: &Node,
 ) -> Option<usize> {
-    
     let mut last = last_byte;
-    let max_lhs_width = pairs.iter().map(|p| p.lh_width).max().unwrap_or(0);
     let target_lhs_col = absolute_col_in_slice(src, base_col, pairs[0].lh_start_byte);
+    let target_rhs_col = pairs
+        .iter()
+        .map(|p| target_lhs_col + p.lh_width)
+        .max()
+        .unwrap_or(target_lhs_col)
+        + 1;
+
     let mut prev_line_start: Option<usize> = None;
+
     for (i, pair) in pairs.iter().enumerate() {
         let line_start = line_start_byte(src, pair.lh_start_byte);
 
@@ -145,24 +150,31 @@ pub fn build_aligned_let_binding_vec(
 
         out.push_str(&pair.lh_string);
 
-        let spaces = (max_lhs_width - pair.lh_width) + 1;
+        let current_rhs_anchor = if pair.lh_string.contains('\n') {
+            pair.lh_width
+        } else {
+            target_lhs_col + pair.lh_width
+        };
+
+        let spaces = target_rhs_col.saturating_sub(current_rhs_anchor);
+        
         out.push_str(&" ".repeat(spaces));
 
-        let old_rhs_col = absolute_col_in_slice(src, base_col, pair.rh_start_byte);
-        let new_rhs_col = target_lhs_col + pair.lh_width + spaces;
-
-        let adjusted_rhs = shift_multiline_block(
-            &pair.rh_string,
-            new_rhs_col as isize - old_rhs_col as isize,
-        );
-
-        out.push_str(&adjusted_rhs);
+        if pair.rh_string.contains('\n') {
+            let old_rhs_col = absolute_col_in_slice(src, base_col, pair.rh_start_byte);
+            let adjusted_rhs = shift_multiline_block(
+                &pair.rh_string,
+                target_rhs_col as isize - old_rhs_col as isize,
+            );
+            out.push_str(&adjusted_rhs);
+        } else {
+            out.push_str(pair.rh_string.trim_start());
+        }
 
         last = pair.rh_end_byte;
         prev_line_start = Some(line_start);
     }
 
-    // preserve everything from last rhs through the closing binding vector `]`
     let binding_vec_end = binding_vec.end_byte();
     if last < binding_vec_end {
         out.push_str(&src[last..binding_vec_end]);
