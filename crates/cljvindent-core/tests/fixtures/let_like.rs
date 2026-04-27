@@ -23,12 +23,12 @@ a (fooo call foooo)]
 }
 
 #[fixture]
-pub fn simple_let_with_destracturing_symbol() -> (&'static str, &'static str) {
+pub fn simple_let_with_destructuring_symbol() -> (&'static str, &'static str) {
     let inp = r#"
 (let [dummy-1 0
       dummy-really-long-sym-really-long "foooooooo"
 a                                           (fooo call foooo)
-      {:key [fooo faaa] :as res} a]
+      {:keys [fooo faaa] :as res} a]
   (do
     (foo1 a)
     (foo2 a)))
@@ -37,7 +37,7 @@ a                                           (fooo call foooo)
 (let [dummy-1                           0
       dummy-really-long-sym-really-long "foooooooo"
       a                                 (fooo call foooo)
-      {:key [fooo faaa] :as res}        a]
+      {:keys [fooo faaa] :as res}        a]
   (do
     (foo1 a)
     (foo2 a)))
@@ -45,12 +45,12 @@ a                                           (fooo call foooo)
     (inp, expected)
 } 
 #[fixture]
-pub fn simple_let_with_multiline_destrucaturing_symbol() -> (&'static str, &'static str){
+pub fn simple_let_with_multiline_destructuring_symbol() -> (&'static str, &'static str){
     let inp = r#"
 (let [dummy-1            0
 dummy-really-long-sym-really-long                                     "foooooooo"
       a               (fooo call foooo)
-      {:key [fooo faaa]
+      {:keys [fooo faaa]
        :as res}     a]
   (do
     (foo1 a)
@@ -60,8 +60,8 @@ dummy-really-long-sym-really-long                                     "foooooooo
 (let [dummy-1                           0
       dummy-really-long-sym-really-long "foooooooo"
       a                                 (fooo call foooo)
-      {:key [fooo faaa]
-       :as res} a]
+      {:keys [fooo faaa]
+       :as   res}                       a]
   (do
     (foo1 a)
     (foo2 a)))
@@ -82,7 +82,7 @@ pub fn nested_let() -> (&'static str, &'static str){
               c (let [dummy-1                               0
  dummy-really-long-sym-really-long          "foooooooo"
       a  (fooo call foooo)
-      {:key [fooo faaa] :as res}        a]
+      {:keys [fooo faaa] :as res}       a]
   (do
     (foo1 a)
     (foo2 a)))]
@@ -103,7 +103,7 @@ pub fn nested_let() -> (&'static str, &'static str){
                                               c                                 (let [dummy-1                           0
                                                                                       dummy-really-long-sym-really-long "foooooooo"
                                                                                       a                                 (fooo call foooo)
-                                                                                      {:key [fooo faaa] :as res}        a]
+                                                                                      {:keys [fooo faaa] :as res}       a]
                                                                                   (do
                                                                                     (foo1 a)
                                                                                     (foo2 a)))]
