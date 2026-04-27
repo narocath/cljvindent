@@ -13,6 +13,10 @@ use crate::indentation_engine::model::{AlignKind, Extracted};
 
 pub struct LetLikeAligner;
 
+fn last_line_width(s: &str) -> usize {
+    s.lines().last().map(|l| l.chars().count()).unwrap_or(0)
+}
+
 pub fn extract_let_like_pairs(nd: Node, src: &str) -> Option<Vec<Pair>> {
     if nd.kind() != "list_lit" {
         return None;
@@ -43,9 +47,13 @@ pub fn extract_let_like_pairs(nd: Node, src: &str) -> Option<Vec<Pair>> {
         let lhs = chunk[0];
         let rhs = chunk[1];
         let lh_string = node_text(lhs, src).to_string();
-
+        let lh_width = if lh_string.contains('\n') {
+            last_line_width(&lh_string)
+        } else {
+            lh_string.chars().count()
+        };
         pairs.push(Pair {
-            lh_width: lh_string.len(),
+            lh_width,
             lh_start_col: target_lhs_col,
             lh_string,
             rh_string: node_text(rhs, src).to_string(),
